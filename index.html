@@ -698,7 +698,6 @@
           .then((response) => {
             const data = response.data;
             let tab = "";
-            console.log(data[0]._id);
 
             data.forEach(function (user) {
               let date = new Date(user.createdAt).toLocaleString("en-GB");

@@ -303,6 +303,7 @@
                   type="text"
                   name="txt_urole"
                   class="form-control"
+                  id="address"
                   value=""
                 />
               </div>
@@ -311,13 +312,10 @@
 
           <div class="form-group text-center">
             <div class="col-md-12 mt-3">
-              <input
-                type="submit"
-                name="btn_update"
-                class="btn btn-success"
-                value="Update"
-              />
-              <a href="index.html" class="btn btn-danger">Cancel</a>
+              <button class="btn btn-danger mr-3" onclick="updateUser()">
+                UPDATE
+              </button>
+              <a class="btn btn-warning" href="index.html">CANCEL</a>
             </div>
           </div>
 
@@ -381,27 +379,56 @@
         </div>
       </div>
     </div>
-    
   </body>
 
   <script src="../node_modules/axios/dist/axios.min.js"></script>
 
-  <script>
-    function getUser() {
+  <script type="text/javascript">
+    async function getUser() {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       const id = urlParams.get("id");
 
-      axios
+      await axios
         .get(`http://localhost:3000/admin/user/byid?id=${id}`)
         .then((response) => {
           const data = response.data;
+          console.log(data);
           document.getElementById("fullname").value = data.fullname;
           document.getElementById("username").value = data.username;
           document.getElementById("email").value = data.email;
           document.getElementById("phonenumber").value = data.phonenumber;
           document.getElementById("gender").value = data.gender;
-          console.log(data);
+          document.getElementById("address").value =
+            data.address == undefined ? "" : data.address;
+        });
+    }
+
+    async function updateUser() {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const id = urlParams.get("id");
+
+      const fullname = document.getElementById("fullname").value;
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const phonenumber = document.getElementById("phonenumber").value;
+      const gender = document.getElementById("gender").value;
+      const address = document.getElementById("address").value;
+      await axios
+        .patch(`http://localhost:3000/admin/user/updatebyid?id=${id}`, {
+          fullname: fullname,
+          username: username,
+          email: email,
+          phonenumber: phonenumber,
+          gender: gender,
+          address: address,
+        })
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((err) => {
+          console.log(err);
         });
     }
   </script>
