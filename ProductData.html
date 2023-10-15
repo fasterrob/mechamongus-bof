@@ -279,10 +279,19 @@
                   <div class="form-row justify-content-center mt-2 mb-3">
                     <button
                       type="button"
-                      class="btn btn-primary Content-center btn-save"
+                      class="btn btn-primary"
+                      id="btn-submit"
                       onclick="createProduct()"
                     >
                       SUBMIT
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      id="btn-update"
+                      onclick="updateProduct()"
+                    >
+                      UPDATE
                     </button>
                   </div>
                 </form>
@@ -327,6 +336,7 @@
 
     <script type="text/javascript">
       async function getProducts() {
+        document.getElementById("btn-update").style.display = "none";
         await axios
           .get("http://localhost:3000/admin/product/")
           .then((response) => {
@@ -365,28 +375,60 @@
           });
       }
 
+      var editProductId = null;
       async function editProduct(id) {
         await axios
           .get(`http://localhost:3000/admin/product/getproductbyid?id=${id}`)
           .then((response) => {
             const data = response.data;
+            editProductId = id;
+            const uploaded_date = new Date(data.uploaded_date)
+              .toISOString()
+              .split("T")[0];
+            console.log(uploaded_date);
             document.getElementById("product_id").value = data.product_id;
             document.getElementById("product_name").value = data.product_name;
             document.getElementById("product_desc").value = data.product_desc;
             document.getElementById("price").value = data.price;
             document.getElementById("count").value = data.count;
             document.getElementById("category_id").value = data.category_id;
-            document.getElementById("uploaded_date").value = new Date(
-              data.uploaded_date
-            ).toLocaleString("en-GB");
+            document.getElementById("uploaded_date").value = uploaded_date;
           });
+        document.getElementById("btn-update").style.display = "block";
+        document.getElementById("btn-submit").style.display = "none";
       }
 
       async function removeProduct(id) {
         await axios.delete(
           `http://localhost:3000/admin/product/removeproductbyid?id=${id}`
         );
-        getProducts();
+        location.reload();
+      }
+
+      async function updateProduct() {
+        const product_id = document.getElementById("product_id").value;
+        const product_name = document.getElementById("product_name").value;
+        const product_desc = document.getElementById("product_desc").value;
+        const price = document.getElementById("price").value;
+        const count = document.getElementById("count").value;
+        const category_id = document.getElementById("category_id").value;
+        const uploaded_date = document.getElementById("uploaded_date").value;
+        const datetimestamp = new Date(uploaded_date).getTime();
+
+        await axios
+          .patch("http://localhost:3000/admin/product/updateproductbyid", {
+            id: editProductId,
+            product_id: product_id,
+            product_name: product_name,
+            product_desc: product_desc,
+            price: price.toString(),
+            count: count,
+            category_id: category_id,
+            uploaded_date: datetimestamp,
+          })
+          .then((response) => {
+            location.reload();
+          });
       }
 
       async function createProduct() {
@@ -399,7 +441,7 @@
         const uploaded_date = document.getElementById("uploaded_date").value;
         const datetimestamp = new Date(uploaded_date).getTime();
 
-        await await axios
+        await axios
           .post("http://localhost:3000/admin/product/createproduct", {
             product_id: product_id,
             product_name: product_name,
